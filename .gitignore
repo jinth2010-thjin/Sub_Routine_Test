@@ -1,0 +1,5 @@
+fortran/build/
+build/
+__pycache__/
+*.mod
+*.o

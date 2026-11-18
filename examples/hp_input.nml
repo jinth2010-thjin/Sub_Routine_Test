@@ -1,0 +1,49 @@
+! =============================================================================
+! 히트파이프 서브루틴 입력 파일 예제 (Fortran namelist)
+!  - 노드/전도체 번호는 Space Systems Thermal 모델의 실제 ID 로 바꾸세요.
+!  - 전도체(evap_conds, cond_conds, vap_cond)는 모델에 미리 만들어 두고
+!    (초기값 아무거나), 서브루틴이 매 반복마다 값을 덮어씁니다.
+!  - 생략한 항목은 hp_model.f90 의 hp_config 기본값을 사용합니다.
+!  - 단위: SI (m, K, W, Pa, mol, m3)
+! =============================================================================
+&hp_global
+  nhp = 2
+/
+
+! ---- CCHP : 장비 패널 수평 히트파이프
+&heat_pipe
+  name       = 'CCHP_PANEL_1'
+  ne = 2, nc = 4
+  dx_e       = 0.15, 0.15
+  dx_c       = 0.15, 0.15, 0.15, 0.15
+  evap_nodes = 1001, 1002          ! 증발부 벽(새들) 노드
+  cond_nodes = 1011, 1012, 1013, 1014
+  vap_node_e = 1100                ! 증기 노드 (산술 노드 또는 작은 열용량)
+  vap_node_c = 1100                ! 같은 번호 = 증기 노드 1개 모델
+  evap_conds = 5001, 5002          ! 증발부 벽 <-> 증기 노드 전도체
+  cond_conds = 5011, 5012, 5013, 5014
+  vap_cond   = 0                   ! 증기 노드 1개이면 0
+  L_evap = 0.30, L_adia = 0.40, L_cond = 0.60
+  r_vap = 4.0e-3, groove_w = 0.6e-3, groove_d = 1.2e-3, n_groove = 24
+  r_out = 6.35e-3, k_wall = 200.0
+  elevation = 0.0                  ! 지상시험 역경사 [m], 궤도 해석은 0
+/
+
+! ---- VCHP : 냉저장조(cold reservoir) 가변전도 히트파이프
+&heat_pipe
+  name       = 'VCHP_BATTERY'
+  ne = 2, nc = 10
+  dx_e       = 0.15, 0.15
+  dx_c       = 10*0.06
+  evap_nodes = 2001, 2002
+  cond_nodes = 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020
+  vap_node_e = 2100
+  vap_node_c = 2101                ! 증기 노드 2개 -> vap_cond 필요
+  vap_cond   = 6100
+  res_node   = 2200                ! NCG 저장조 노드
+  evap_conds = 6001, 6002
+  cond_conds = 6011, 6012, 6013, 6014, 6015, 6016, 6017, 6018, 6019, 6020
+  v_res = 30.0e-6                  ! 저장조 체적 30 cm3
+  charge_T_full = 293.15           ! NCG 충전 설계점: 증기 20 C, 저장조 -10 C 에서 완전 개방
+  charge_T_res  = 263.15           !   (n_gas = ... 로 몰수를 직접 줄 수도 있음)
+/
